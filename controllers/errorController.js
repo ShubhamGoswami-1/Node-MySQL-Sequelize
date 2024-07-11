@@ -2,7 +2,6 @@ const AppError = require('./../utils/AppError');
 
 const handleDuplicateFieldsDB = err => {
   const field = err.fields ? Object.keys(err.fields)[0] : null;
-  console.log(field);
 
   const message = `Duplicate field value: ${field}. Please use another value!`;
   return new AppError(message, 400);

@@ -15,5 +15,6 @@ router.get('/users', authController.login, authController.restrictTo('admin'), u
 router.get('/user/:userId', authController.login, authController.restrictTo('admin'), userController.getUserById);
 router.patch('/user/:userId', userController.updateUserById);
 router.delete('/user/:userId', authController.login, authController.restrictTo('admin'), userController.deleteUser);
+router.route('/getNamesOfDesiredLength').post(userController.checkNameLength)
 
 module.exports = router;

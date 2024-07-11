@@ -5,6 +5,11 @@ const { sequelize } = require('./../database');
 const User = require('./userModel');
 
 const Log = sequelize.define('Log', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     action: {
         type: DataTypes.STRING,
         allowNull: false

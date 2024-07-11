@@ -1,3 +1,4 @@
+const { sequelize } = require('../database');
 const User = require('./../models/userModel');
 
 const AppError = require('./../utils/AppError');
@@ -95,6 +96,8 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
         where: { id: userId }
     });
 
+    console.log("User deleting: ", user);
+
     if (!user) {
         return next(new AppError('No user found with that ID', 404));
     }
@@ -104,5 +107,18 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
     res.status(204).json({
         status: 'success',
         data: null
+    });
+});
+
+exports.checkNameLength = catchAsync(async (req, res, next) => {
+    const { len } = req.body;
+
+    const users = await User.findAll({
+        where: sequelize.where(sequelize.fn('char_length', sequelize.col('name')), len)
+    });
+
+    res.status(200).json({
+        status: 'success',
+        users
     });
 });
