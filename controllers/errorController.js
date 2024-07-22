@@ -1,4 +1,4 @@
-const AppError = require('./../utils/AppError');
+import AppError from './../utils/AppError.js';
 
 const handleDuplicateFieldsDB = err => {
   const field = err.fields ? Object.keys(err.fields)[0] : null;
@@ -44,7 +44,7 @@ const sendErrorProd = (err, res) => {
   }
 };
 
-module.exports = (err, req, res, next) => {
+const globalErrorHandler = (err, req, res, next) => {
 
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
@@ -60,3 +60,5 @@ module.exports = (err, req, res, next) => {
     sendErrorProd(error, res);
   }
 };
+
+export default globalErrorHandler;

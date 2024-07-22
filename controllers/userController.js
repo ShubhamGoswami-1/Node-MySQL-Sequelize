@@ -1,36 +1,20 @@
-const { sequelize } = require('../database');
-const User = require('./../models/userModel');
+import catchAsync from './../utils/catchAsync.js';
+import userService from './../services/userService.js';
 
-const AppError = require('./../utils/AppError');
-const catchAsync = require('./../utils/catchAsync');
+// const createUser = catchAsync(async (req, res, next) => {
+//     const userObj = { ...req.body };
+//     const newUser = await userService.createUser(userObj);
+//     res.status(201).json({
+//         status: "success",
+//         data: {
+//             newUser
+//         }
+//     });
+// });
 
-const LogController = require('./logController');
-
-exports.createUser = catchAsync( async (req, res, next) => {
-    const userObj = { ...req.body };
-
-    const newUser = await User.create(userObj);
-
-    await LogController.createLog('Create User', 'User created successfully', newUser.id);
-
-    res.status(201).json({
-        status: "success",
-        data: {
-            newUser
-        }
-    });
-})
-
-exports.getMe = catchAsync(async(req, res, next) => {
-
+const getMe = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
-
-    const user = await User.findOne({ where: { id: userId } });
-
-    if(!user){
-        return next(new AppError(`No user found with user id:${userId}`, 404));
-    }
-
+    const user = await userService.getUserById(userId);
     res.status(200).json({
         status: "success",
         data: {
@@ -39,9 +23,8 @@ exports.getMe = catchAsync(async(req, res, next) => {
     });
 });
 
-exports.getAllUsers = catchAsync(async(req, res, next) => {
-    const users = await User.findAll();
-
+const getAllUsers = catchAsync(async (req, res, next) => {
+    const users = await userService.getAllUsers();
     res.status(200).json({
         status: "success",
         data: {
@@ -50,18 +33,9 @@ exports.getAllUsers = catchAsync(async(req, res, next) => {
     });
 });
 
-
-
-exports.getUserById = catchAsync(async(req, res, next) => {
-
+const getUserById = catchAsync(async (req, res, next) => {
     const userId = req.params.userId;
-
-    const user = await User.findOne({ where: { id: userId } });
-
-    if(!user){
-        return next(new AppError(`No user found with user id:${userId}`, 404));
-    }
-
+    const user = await userService.getUserById(userId);
     res.status(200).json({
         status: "success",
         data: {
@@ -70,55 +44,40 @@ exports.getUserById = catchAsync(async(req, res, next) => {
     });
 });
 
-exports.updateUserById = catchAsync(async (req, res, next) => {
-    
-    const userId = req.params.userId;
+const updateUserById = catchAsync(async (req, res, next) => {
+    const userId = req.params.id;
     const userObj = req.body;
-
-    const [updated] = await User.update(userObj, { where: { id: userId } });
-
-    if(!updated) {
-        return next(new AppError(`No ser updated!!!`, 400));
-    }
-
-    await LogController.createLog('Update User', `User with ID ${userId} updated`, userId);
-
+    await userService.updateUserById(userId, userObj);
     res.status(200).json({
         status: "success",
-        message: "User details updated Successfully!!!"
+        message: "User details updated successfully!!!"
     });
-})
+});
 
-exports.deleteUser = catchAsync(async (req, res, next) => {
+const deleteUser = catchAsync(async (req, res, next) => {
     const userId = req.params.userId;
-
-    const user = await User.destroy({
-        where: { id: userId }
-    });
-
-    console.log("User deleting: ", user);
-
-    if (!user) {
-        return next(new AppError('No user found with that ID', 404));
-    }
-
-    await LogController.createLog('Delete User', `User with ID ${userId} deleted`, userId);
-
+    await userService.deleteUserById(userId);
     res.status(204).json({
         status: 'success',
         data: null
     });
 });
 
-exports.checkNameLength = catchAsync(async (req, res, next) => {
+const checkNameLength = catchAsync(async (req, res, next) => {
     const { len } = req.body;
-
-    const users = await User.findAll({
-        where: sequelize.where(sequelize.fn('char_length', sequelize.col('name')), len)
-    });
-
+    const users = await userService.getUsersByNameLength(len);
     res.status(200).json({
         status: 'success',
         users
     });
 });
+
+export default { 
+    // createUser,
+    getMe, 
+    getAllUsers, 
+    getUserById, 
+    updateUserById, 
+    deleteUser, 
+    checkNameLength 
+};

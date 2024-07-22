@@ -1,8 +1,8 @@
 // models/logModel.js
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('./../database');
+import { DataTypes } from 'sequelize';
+import { sequelize } from './../database.js';
 
-const User = require('./userModel');
+import User from './userModel.js';
 
 const Log = sequelize.define('Log', {
     id: {
@@ -20,7 +20,7 @@ const Log = sequelize.define('Log', {
     },
     userId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: User,
             key: 'id'
@@ -28,10 +28,11 @@ const Log = sequelize.define('Log', {
         onDelete: 'CASCADE'
     }
 }, {
-    tableName: 'Logs'
+    tableName: 'Logs',
+    paranoid: true, // Enable soft deletes
 });
 
 User.hasMany(Log, { foreignKey: 'userId' });
 Log.belongsTo(User, { foreignKey: 'userId' });
 
-module.exports = Log;
+export default Log;

@@ -1,6 +1,6 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('./../database');
-const bcrypt = require('bcryptjs');
+import { DataTypes } from 'sequelize';
+import { sequelize } from './../database.js';
+import bcrypt from 'bcryptjs';
 
 const User = sequelize.define('User', {
     id: {
@@ -42,7 +42,7 @@ const User = sequelize.define('User', {
         }
     },
     confirmPassword: {
-        type: DataTypes.VIRTUAL, // Use VIRTUAL data type to exclude this field from being saved to the database
+        type: DataTypes.VIRTUAL,
         allowNull: false,
         validate: {
             isValidPassword(value) {
@@ -62,6 +62,7 @@ const User = sequelize.define('User', {
     }
 }, {
     tableName: 'Users',
+    paranoid: true, // Enable soft deletes
     defaultScope: {
         attributes: { exclude: ['password', 'role', 'passwordChangedAt'] }
     },
@@ -83,4 +84,23 @@ User.prototype.correctPassword = async function(candidatePassword, userPassword)
     return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-module.exports = User;
+// Method to check if password was changed after token was issued
+User.prototype.changedPasswordAfter = function(JWTTimestamp) {
+    if (this.passwordChangedAt) {
+        const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+        return JWTTimestamp < changedTimestamp;
+    }
+    return false;
+};
+
+// Method to create a password reset token
+User.prototype.createPasswordResetToken = function() {
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    return resetToken;
+};
+
+export default User;

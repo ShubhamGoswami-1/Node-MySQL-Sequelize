@@ -1,6 +1,6 @@
-const dotenv = require('dotenv');
-const app = require('./app');
-const { sequelize, connectToDatabase } = require('./database');
+import dotenv from 'dotenv';
+import app from './app.js';
+import { sequelize, connectToDatabase } from './database.js';
 
 dotenv.config({ path: './config.env' });
 

@@ -1,5 +1,14 @@
-const express = require("express");
-const morgan = require("morgan");
+import express from "express";
+import morgan from "morgan";
+import swaggerUi from 'swagger-ui-express';
+
+import specs from './utils/swaggerConfig.js';
+import AppError from './utils/appError.js';
+
+import userRouter from './routes/userRoutes.js';
+import logRouter from './routes/logRoutes.js';
+
+import globalErrorHandler from "./controllers/errorController.js";
 
 const app = express();
 
@@ -11,18 +20,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan('dev'));
 
-const AppError = require('./utils/AppError');
-
-const userRouter = require('./routes/userRoutes');
-const logRouter = require('./routes/logRoutes');
-
-const globalErrorHandler = require("./controllers/errorController");
+// Serve Swagger UI at /api-docs endpoint
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // ROUTES
 app.use('/api/v1/logs', logRouter); 
 app.use('/api/v1', userRouter);
-
-
 
 app.all('*', (req, res, next) => {
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
@@ -30,4 +33,4 @@ app.all('*', (req, res, next) => {
 
 app.use(globalErrorHandler);
 
-module.exports = app;
+export default app;

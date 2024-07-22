@@ -1,0 +1,11 @@
+// week 1
+refactor according to the folder structures *
+esm *
+validation - joi *
+swagger *
+
+// week 2
+jwt *
+mails on user signup *
+post table -> likes
+file upload

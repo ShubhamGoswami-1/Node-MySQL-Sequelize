@@ -1,21 +1,12 @@
-const Log = require('./../models/logModel');
-const User = require('./../models/userModel');
+import catchAsync from './../utils/catchAsync.js';
+import logService from './../services/logService.js';
 
-const catchAsync = require('./../utils/catchAsync');
-const AppError = require('./../utils/AppError');
-
-exports.createLog = catchAsync(async (action, description, userId) => {
-    await Log.create({ action, description, userId });
+const createLog = catchAsync(async (action, description, userId) => {
+    await logService.createLog(action, description, userId);
 });
 
-exports.getAllLogs = catchAsync(async (req, res, next) => {
-    const logs = await Log.findAll({
-        include: {
-            model: User,
-            attributes: ['id', 'name', 'email']
-        }
-    });
-
+const getAllLogs = catchAsync(async (req, res, next) => {
+    const logs = await logService.getAllLogs();
     res.status(200).json({
         status: 'success',
         data: {
@@ -24,21 +15,9 @@ exports.getAllLogs = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.getLogsByUserId = catchAsync(async (req, res, next) => {
+const getLogsByUserId = catchAsync(async (req, res, next) => {
     const userId = req.params.userId;
-
-    const logs = await Log.findAll({
-        where: { userId },
-        include: {
-            model: User,
-            attributes: ['id', 'name', 'email']
-        }
-    });
-
-    if (!logs.length) {
-        return next(new AppError(`No logs found for user with ID ${userId}`, 404));
-    }
-
+    const logs = await logService.getLogsByUserId(userId);
     res.status(200).json({
         status: 'success',
         data: {
@@ -46,3 +25,5 @@ exports.getLogsByUserId = catchAsync(async (req, res, next) => {
         }
     });
 });
+
+export default { createLog, getAllLogs, getLogsByUserId };
